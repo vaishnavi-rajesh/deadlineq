@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-
+from app.services.ai_extractor_service import extract_deadline_from_email
 app= FastAPI (
     title="DeadlineQ API",
     description="AI powered Gmail assistant",
@@ -19,9 +19,13 @@ def root():
     }
 
 @app.post("/extract-test")
-def extract_test(email:EmailInput):
-    return{
-        "received subject":email.subject,
-        "received body":email.body,
-        "message":"email received successfully"
-    }
+def extract_test(email: EmailInput):
+    try:
+        result = extract_deadline_from_email(email.subject, email.body)
+        return result
+    except Exception as e:
+        return {
+            "error": str(e),
+            "error_type": type(e).__name__
+        }
+    
